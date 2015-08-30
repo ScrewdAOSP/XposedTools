@@ -78,9 +78,11 @@ echo "********************************"
 echo "Xposed framework uninstaller zip"
 echo "********************************"
 
-echo "- Mounting /system read-write"
+echo "- Mounting /system and /vendor read-write"
 mount /system >/dev/null 2>&1
+mount /vendor >/dev/null 2>&1
 mount -o remount,rw /system
+mount -o remount,rw /vendor >/dev/null 2>&1
 if [ ! -f '/system/build.prop' ]; then
   echo "! Failed: /system could not be mounted!"
   exit 1
@@ -142,6 +144,10 @@ fi
 if [ ! -z $XLOWSPACE ]; then
   rm -rf /data/local/tmp/xposed-backups
   rm -f /system/xposed-backups.tgz
+fi
+
+if [ "$API" -ge "22" ]; then
+  find /system /vendor -type f -name '*.odex.gz.xposed' 2>/dev/null | while read f; do mv "$f" "${f%.xposed}"; done
 fi
 
 echo "- Done"
